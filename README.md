@@ -18,7 +18,7 @@ A decentralized auction platform built with Solidity that supports automatic bid
 Make sure you have the following installed:
 
 - 📦 **Node.js** (v16 or higher)
-- 🔧 **npm** or **yarn**
+- 🧶 **Yarn** (v1.22 or higher, or Yarn 4.6.0 as specified in package.json)
 - 🦾 **Hardhat** development environment
 
 ### Installation Steps
@@ -28,15 +28,13 @@ Make sure you have the following installed:
 2. **Install dependencies** 📋
 
    ```bash
-   npm install
-   # or
    yarn install
    ```
 
 3. **Install Hardhat and dependencies** ⚡
 
    ```bash
-   npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox
+   yarn add --dev hardhat @nomicfoundation/hardhat-toolbox
    ```
 
 4. **Create environment file** 🔐
@@ -54,7 +52,7 @@ Make sure you have the following installed:
 
 5. **Compile the contract** 🔨
    ```bash
-   npx hardhat compile
+   yarn compile
    ```
 
 ## 🧪 How to Test the Auction
@@ -64,21 +62,148 @@ Make sure you have the following installed:
 1. **Start local Hardhat network** 🚀
 
    ```bash
-   npx hardhat node
+   yarn node
    ```
 
 2. **Deploy to local network** 📦
 
    ```bash
-   npx hardhat run scripts/deploy.js --network localhost
+   yarn deploy:localhost
    ```
 
 3. **Run test suite** ✅
    ```bash
-   npx hardhat test
+   yarn test
    ```
 
-### Manual Testing Steps 🔍
+#### Step 1: Deploy Contract 🚀
+
+```bash
+# Deploy to local network
+yarn deploy:localhost
+
+# Deploy to Sepolia testnet
+yarn deploy:sepolia
+```
+
+#### Step 2: Interact with Contract 💬
+
+```bash
+# Open Hardhat console
+yarn console:localhost
+
+# Get contract instance
+const Auction = await ethers.getContractFactory("Auction");
+const auction = Auction.attach("YOUR_CONTRACT_ADDRESS");
+```
+
+#### Step 3: Test Bidding Flow 💰
+
+```javascript
+// Get signers (test accounts)
+const [owner, bidder1, bidder2, bidder3] = await ethers.getSigners();
+
+// Check auction info
+await auction.getAuctionInfo();
+
+// Place first bid (0.1 ETH)
+await auction.connect(bidder1).bid({ value: ethers.parseEther("0.1") });
+
+// Place higher bid (0.2 ETH - meets 5% increment)
+await auction.connect(bidder2).bid({ value: ethers.parseEther("0.2") });
+
+// Check current winner
+await auction.getWinner();
+
+// Get all bids history
+await auction.getAllBids();
+```
+
+#### Step 4: Test Edge Cases 🎯
+
+**Test Minimum Bid Increment:**
+
+```javascript
+// This should fail (less than 5% increment)
+await auction.connect(bidder3).bid({ value: ethers.parseEther("0.21") });
+```
+
+**Test Auto Extension:**
+
+```javascript
+// Fast forward to near auction end
+await network.provider.send("evm_increaseTime", [86400 - 300]); // 5 min before end
+await network.provider.send("evm_mine");
+
+// Place bid to trigger extension
+await auction.connect(bidder3).bid({ value: ethers.parseEther("0.25") });
+```
+
+**Test Withdrawal:**
+
+```javascript
+// Non-winner withdraws excess funds
+await auction.connect(bidder1).withdrawExcess();
+```
+
+#### Step 5: Test Auction End 🏁
+
+```javascript
+// Fast forward past auction end
+await network.provider.send("evm_increaseTime", [86400]);
+await network.provider.send("evm_mine");
+
+// End auction
+await auction.endAuction();
+
+// Owner withdraws profits
+await auction.connect(owner).withdrawProfits();
+```
+
+## 📋 Available Scripts
+
+The project includes these convenient Yarn scripts:
+
+- `yarn compile` - Compile the smart contracts
+- `yarn test` - Run the test suite
+- `yarn deploy:localhost` - Deploy to local Hardhat network
+- `yarn deploy:sepolia` - Deploy to Sepolia testnet
+- `yarn verify` - Verify contract on Etherscan
+- `yarn node` - Start local Hardhat node
+- `yarn console:localhost` - Open Hardhat console for local network
+- `yarn console:sepolia` - Open Hardhat console for Sepolia
+- `yarn clean` - Clean compiled artifacts
+
+## 🔧 Project Configuration
+
+This project uses **Yarn 4.6.0** as specified in the `packageManager` field. Make sure you have the correct version installed:
+
+```bash
+# Check your Yarn version
+yarn --version
+
+# Install specific version if needed
+npm install -g yarn@4.6.0
+```
+
+## 📦 Dependencies
+
+The project includes all necessary dependencies for Hardhat development:
+
+- **Hardhat**: Ethereum development environment
+- **Ethers.js v6**: Ethereum library for JavaScript
+- **Chai**: Testing framework
+- **TypeScript**: Type safety for development
+- **Hardhat plugins**: Additional tooling for verification, gas reporting, and more
+
+## 🚀 Quick Start
+
+1. Clone the repository
+2. Run `yarn install`
+3. Copy `.env.example` to `.env` and configure
+4. Run `yarn compile` to compile contracts
+5. Run `yarn test` to verify everything works
+6. Start developing with `yarn node` for local testing
 
 #### Step 1: Deploy Contract 🚀
 
