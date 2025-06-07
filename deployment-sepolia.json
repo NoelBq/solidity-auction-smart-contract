@@ -1,0 +1,12 @@
+{
+  "network": "sepolia",
+  "contractAddress": "0x428F2b9F386Dd99A33D4F5a466dB84C79bCaf440",
+  "owner": "0xAdA2bc9862EA557448CB4a46A4B82A8E0BA46521",
+  "deploymentDate": "2025-06-07T22:07:03.243Z",
+  "auctionItem": "🎨 Cool Pixel Art 🖼️ 🎨",
+  "auctionDuration": 86400,
+  "constructorArgs": [
+    86400,
+    "🎨 Cool Pixel Art 🖼️ 🎨"
+  ]
+}

@@ -1,3 +1,4 @@
+# Yarn 4 (Berry)
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -5,9 +6,15 @@
 !.yarn/sdks
 !.yarn/versions
 
-# Swap the comments on the following lines if you wish to use zero-installs
-# In that case, don't forget to run `yarn config set enableGlobalCache false`!
-# Documentation here: https://yarnpkg.com/features/caching#zero-installs
+# Ignore cache if not using Zero-Installs
+.yarn/cache
 
-#!.yarn/cache
+# Ignore Plug'n'Play loader files
 .pnp.*
+.pnp
+
+# Ignore environment files
+.env
+.env.*  # Optional: also ignore things like `.env.local`, `.env.production`
+
+node_modules/
