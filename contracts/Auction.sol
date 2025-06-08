@@ -25,7 +25,7 @@ contract Auction {
     mapping(address => uint256) public pendingReturns;
     mapping(address => uint256) public totalDeposits;
 
-    // Array to store bid history
+    // bid history
     Bid[] public bids;
 
     // Events
@@ -84,37 +84,26 @@ contract Auction {
         uint256 minimumBid = highestBid +
             ((highestBid * MINIMUM_BID_INCREMENT) / 100);
 
-        // Verify that the new bid is valid
         require(
             msg.value >= minimumBid,
             "Bid must be at least 5% higher than current bid"
         );
-
-        // If there's a previous bid from the same user, add it
         uint256 totalBidAmount = msg.value + pendingReturns[msg.sender];
 
-        // Verify that the total bid is sufficient
         require(
             totalBidAmount >= minimumBid,
             "Total bid is not sufficient"
         );
 
-        // Update the user's total deposit
         totalDeposits[msg.sender] += msg.value;
 
-        // If there was a previous winner, move their bid to pendingReturns
         if (highestBidder != address(0)) {
             pendingReturns[highestBidder] += highestBid;
         }
 
-        // Update the current winner
         highestBidder = msg.sender;
         highestBid = totalBidAmount;
-
-        // Clear the new winner's pendingReturns
         pendingReturns[msg.sender] = 0;
-
-        // Record the bid in history
         bids.push(
             Bid({
                 bidder: msg.sender,
@@ -149,9 +138,9 @@ contract Auction {
     }
 
     /**
-     * @dev Ends the auction and returns deposits
+     * @dev Ends the auction and returns deposits - only callable by the owner
      */
-    function endAuction() external onlyAfterEnd {
+   function endAuction() external onlyOwner onlyAfterEnd {
         require(!auctionEnded, "The auction has already been finalized");
 
         auctionEnded = true;
@@ -162,7 +151,7 @@ contract Auction {
     }
 
     /**
-     * @dev Internal function to return deposits with commission
+     * @dev Internal function to return deposits with commission after the auction ends
      */
     function _returnDeposits() private {
         for (uint256 i = 0; i < bids.length; i++) {
@@ -205,23 +194,7 @@ contract Auction {
         (bool success, ) = payable(owner).call{value: balance}("");
         require(success, "Error sending funds");
     }
-
-    /**
-     * @dev Allows the owner to change the auction end time // only for testing purposes
-     * @param _newEndTime New end timestamp
-     */
-    function changeAuctionEndTime(uint256 _newEndTime) external onlyOwner {
-        require(!auctionEnded, "The auction has already ended");
-        require(
-            _newEndTime > block.timestamp,
-            "New time must be in the future"
-        );
-
-        auctionEndTime = _newEndTime;
-
-        emit AuctionExtended(_newEndTime);
-    }
-
+    
     /**
      * @dev Gets the current winner
      * @return winner Winner's address
